@@ -1,21 +1,61 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import { submitComment } from "../services";
 
-function CommentsForm() {
+function CommentsForm({ slug }) {
   const [error, setError] = useState("");
-  const [localStorage, setLocalStorage] = useState(null);
-  const [showSuccessMessage, setSuccessMessage] = useState(null);
+  const [showSuccessMessage, setShowSuccessMessage] = useState(null);
   const commentEl = useRef();
   const nameEl = useRef();
   const emailEl = useRef();
   const storeDataEl = useRef();
 
-  const handleSubmission = () =>{
+  useEffect(() => {
+    nameEl.current.value = window.localStorage.getItem("name");
+    emailEl.current.value = window.localStorage.getItem("email");
+  }, []);
 
-  }
+  const handleSubmission = (e) => {
+    e.preventDefault();
+    setError(false);
+
+    const { value: comment } = commentEl.current;
+    const { value: name } = nameEl.current;
+    const { value: email } = emailEl.current;
+    const { checked: storeData } = storeDataEl.current;
+
+    if (!commentEl || !nameEl || !nameEl) {
+      setError(true);
+      return;
+    }
+
+    const commentObj = {
+      name,
+      comment,
+      email,
+      slug,
+    };
+
+    if (storeData) {
+      window.localStorage.setItem("name", name);
+      window.localStorage.setItem("email", email);
+    }
+    if (!storeData) {
+      window.localStorage.removeItem("name", name);
+      window.localStorage.removeItem("email", email);
+    }
+
+    submitComment(commentObj).then((res) => {
+      console.log(res.data);
+      setShowSuccessMessage(true);
+      setTimeout(() => {
+        setShowSuccessMessage(false);
+      }, [3000]);
+    });
+  };
 
   return (
     <div className="bg-white rounded-lg shadow-lg p-8 pb-12 mb-8 ">
-      <h1 className="font-bold text-xl">Comment</h1>
+      <h1 className="font-bold text-xl">Leave a comment</h1>
       <form action="" className="space-y-10 mt-6">
         <textarea
           ref={commentEl}
@@ -48,10 +88,15 @@ function CommentsForm() {
           <button
             onClick={handleSubmission}
             type="submit"
-            className="bg-pink-600 text-white rounded-full text-lg py-2 px-8"
+            className="bg-pink-600 transition duration-400 hover:bg-blue-500 text-white rounded-full text-lg py-2 px-8"
           >
             Send comment
           </button>
+          {showSuccessMessage && (
+            <span className="float-left text-green-400 text-xl font-semibold mt-3">
+              Comment submited for review!
+            </span>
+          )}
         </div>
       </form>
     </div>

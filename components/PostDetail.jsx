@@ -30,7 +30,7 @@ function PostDetail({ post }) {
         );
       case "numbered-list":
         return (
-          <ol className="space-y-2">
+          <ol key={index} className="space-y-2">
             {obj.children.flatMap((list, index) =>
               list.children.flatMap((listElem) =>
                 listElem.children.flatMap((innerElement) => (
@@ -102,16 +102,13 @@ function PostDetail({ post }) {
         </div>
       </div>
       <h1 className="font-bold text-4xl mb-8">{post.title}</h1>
-      {
-        <div>
-          {post.content.raw.children.map((obj, i) => {
-            const children = obj.children.map((item, i2) =>
-              getContentFragment(i2, item.text, item)
-            );
-            return getContentFragment(i, children, obj, obj.type);
-          })}
-        </div>
-      }
+      {post.content.raw.children.map((typeObj, index) => {
+        const children = typeObj.children.map((item, itemindex) =>
+          getContentFragment(itemindex, item.text, item)
+        );
+
+        return getContentFragment(index, children, typeObj, typeObj.type);
+      })}
     </div>
   );
 }
